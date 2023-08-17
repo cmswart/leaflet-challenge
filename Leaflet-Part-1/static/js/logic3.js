@@ -1,6 +1,6 @@
-console.log("Start of map using logic2");
-
+//logic 1 creates initial layers, layer group and controls
 //logic2 gets USGS Data, creates circle marker, time and magnitude pop up
+//logic 3 updates styling/circlemarker/color 
 
 let street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -48,20 +48,39 @@ d3.json(queryUrl).then(function (data) {
   // Once we get a response, send the data.features object to the createFeatures function.
   console.log(data.features[0]);
 
+//function for marker size
+  function markerSize(magnitude) {
+    return magnitude * 4
+  }
+//function for markerColor
+  function markerColor(depth) {
+    return depth > 150 ? '#d73027' :
+    depth > 100  ? '#f46d43' :
+    depth > 50  ? '#fdae61' :
+    depth > 30  ? '#fee08b' :
+    depth > 15   ? '#d9ef8b' :
+    depth > 5   ? '#a6d96a' :
+    depth > 2   ? '#66bd63' :
+               '#1a9850';
+}
   //create a GeoJSON layer using data
-  var geojsonMarkerOptions = {
-    radius: 8,
-    fillColor: "#ff7800",
+  // Define a markerSize() function that will give each city a different radius based on its population.
+function styleInfo(feature) {
+    return {
+    radius: markerSize(feature.properties.mag),
+    fillColor: markerColor(feature.geometry.coordinates[2]),
     color: "#000",
     weight: 1,
     opacity: 1,
     fillOpacity: 0.8
   };
-
-  L.geoJSON(data, {
+}
+  
+L.geoJSON(data, {
     pointToLayer: function (feature, latlng) {
-        return L.circleMarker(latlng, geojsonMarkerOptions);
+        return L.circleMarker(latlng);
     },
+    style: styleInfo,
 
     //use onEachFeature to add popup
     onEachFeature: function onEachFeature(feature, layer) {
